@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.fail;
 
 import static com.codeborne.selenide.Condition.visible;
 
-import cucumber.api.PendingException;
 import org.assertj.core.api.Condition;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,6 +22,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import io.cucumber.datatable.DataTable;
+
 import io.syndesis.qe.pages.ModalDialogPage;
 import io.syndesis.qe.pages.integrations.IntegrationStartingStatus;
 import io.syndesis.qe.pages.integrations.Integrations;
@@ -34,6 +34,8 @@ import io.syndesis.qe.utils.ExportedIntegrationJSONUtil;
 import io.syndesis.qe.utils.OpenShiftUtils;
 import io.syndesis.qe.utils.TestUtils;
 import io.syndesis.qe.wait.OpenShiftWaitUtils;
+
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -85,9 +87,9 @@ public class IntegrationSteps {
         SelenideElement integration = integrations.getIntegration(integrationName);
         TestUtils.sleepForJenkinsDelayIfHigher(10);
         assertThat(TestUtils.waitForEvent(
-                status -> status.contains(integrationStatus),
-                () -> integrations.getIntegrationItemStatus(integration),
-                TimeUnit.MINUTES, 10, TimeUnit.SECONDS, 20)
+            status -> status.contains(integrationStatus),
+            () -> integrations.getIntegrationItemStatus(integration),
+            TimeUnit.MINUTES, 10, TimeUnit.SECONDS, 20)
         ).isTrue();
     }
 
@@ -102,9 +104,9 @@ public class IntegrationSteps {
         SelenideElement integration = integrations.getIntegration(integrationName);
         TestUtils.sleepForJenkinsDelayIfHigher(10);
         assertThat(TestUtils.waitForEvent(
-                status -> status.equals(integrationStatus),
-                () -> integrations.getIntegrationItemStartingStatus(integration),
-                TimeUnit.MINUTES, 10, TimeUnit.MILLISECONDS, 30)
+            status -> status.equals(integrationStatus),
+            () -> integrations.getIntegrationItemStartingStatus(integration),
+            TimeUnit.MINUTES, 10, TimeUnit.MILLISECONDS, 30)
         ).isTrue();
     }
 
@@ -118,9 +120,9 @@ public class IntegrationSteps {
     public void exportIntegration() throws InterruptedException {
         File exportedIntegrationFile = detailPage.exportIntegration();
         assertThat(exportedIntegrationFile)
-                .exists()
-                .isFile()
-                .has(new Condition<>(f -> f.length() > 0, "File size should be greater than 0"));
+            .exists()
+            .isFile()
+            .has(new Condition<>(f -> f.length() > 0, "File size should be greater than 0"));
         ExportedIntegrationJSONUtil.testExportedFile(exportedIntegrationFile);
     }
 
@@ -139,7 +141,7 @@ public class IntegrationSteps {
     @And("^Wait until there is no integration pod with name \"([^\"]*)\"$")
     public void waitForIntegrationPodShutdown(String integartionPodName) throws InterruptedException {
         OpenShiftWaitUtils.assertEventually("Pod with name " + integartionPodName + "is still running.",
-                OpenShiftWaitUtils.areNoPodsPresent(integartionPodName), 1000, 5 * 60 * 1000);
+            OpenShiftWaitUtils.areNoPodsPresent(integartionPodName), 1000, 5 * 60 * 1000);
     }
 
     @And("^.*check that data bucket \"([^\"]*)\" is available$")
@@ -216,36 +218,15 @@ public class IntegrationSteps {
 
         //polling every 200 ms for 10 minutes
         for (int i = 0; i < 5 * 60 * 10; i++) {
+
             if (lastStatusIndex == statuses.size() - 1) {
-                switch (checkedPage) {
-                    case "Home":
-                    case "Integrations":
-                        log.info("Status changed to: " + integrations.getIntegrationItemStatus(integrations.getIntegration(integrationName)).trim());
-                        assertThat(integrations.getIntegrationItemStatus(integrations.getIntegration(integrationName)).trim()).isEqualToIgnoringWhitespace("Running");
-                        break;
-                    case "Integration detail":
-                        log.info("Status changed to: " + detailPage.getPublishedVersion().getText().trim());
-                        assertThat(detailPage.getPublishedVersion().getText()).isEqualToIgnoringWhitespace("Published version 1");
-                        break;
-                    default:
-                        fail("Integration status can't be checked on <" + checkedPage + "> page. Only valid options are [Integrations, Integration detail, Home]");
-                }
+                checkLastStatus(integrationName, checkedPage);
                 break;
             }
 
             String status = "";
             try {
-                switch (checkedPage) {
-                    case "Home":
-                    case "Integrations":
-                        status = integrations.getIntegrationItemStartingStatus(integrations.getIntegration(integrationName));
-                        break;
-                    case "Integration detail":
-                        status = detailPage.getStartingStatus();
-                        break;
-                    default:
-                        fail("Integration status can't be checked on <" + checkedPage + "> page. Only valid options are [Integrations, Integration detail, Home]");
-                }
+                status = getIntegrationStatus(integrationName, checkedPage);
             } catch (Throwable t) {
                 lastStatusIndex = statuses.size() - 1;
                 continue;
@@ -269,7 +250,6 @@ public class IntegrationSteps {
                             log.info("Status changed to: " + status);
                         }
                     }
-                } else {
                 }
             }
             try {
@@ -280,6 +260,40 @@ public class IntegrationSteps {
         }
 
         assertThat(matchingStatesNumber).isGreaterThanOrEqualTo(2).withFailMessage("Spotted statuses' order:" + statusesMessage.toString());
+    }
+
+    private void checkLastStatus(String integrationName, String checkedPage) {
+        String status = null;
+        switch (checkedPage) {
+            case "Home":
+            case "Integrations":
+                status = integrations.getIntegrationItemStatus(integrations.getIntegration(integrationName)).trim();
+                log.info("Status changed to: " + status);
+                assertThat(status).isEqualToIgnoringWhitespace("Running");
+                break;
+            case "Integration detail":
+                status = detailPage.getPublishedVersion().getText();
+                log.info("Status changed to: " + status.trim());
+                assertThat(status).isEqualToIgnoringWhitespace("Published version 1");
+                break;
+            default:
+                fail("Integration status can't be checked on <" + checkedPage +
+                    "> page. Only valid options are [Integrations, Integration detail, Home]");
+        }
+    }
+
+    private String getIntegrationStatus(String integrationName, String checkedPage) {
+        switch (checkedPage) {
+            case "Home":
+            case "Integrations":
+                return integrations.getIntegrationItemStartingStatus(integrations.getIntegration(integrationName));
+            case "Integration detail":
+                return detailPage.getStartingStatus();
+            default:
+                fail("Integration status can't be checked on <" + checkedPage +
+                    "> page. Only valid options are [Integrations, Integration detail, Home]");
+        }
+        return "";
     }
 
     @Then("^verify there are ([0-9]+) flows in the integration$")
@@ -295,10 +309,10 @@ public class IntegrationSteps {
     @Then("^validate that logs of integration \"([^\"]*)\" contains items with IDs \"([^\"]*)\"$")
     public void validateThatLogsOfIntegrationContainsBodiesOfItems(String integrationName, String items) throws Throwable {
         String searchedString = "[" + String.join(", ",
-                Arrays.stream(items.split(","))
-                        .map(
-                                s -> String.format("{\"id\":%s}", s))
-                        .collect(Collectors.toList())) + "]";
+            Arrays.stream(items.split(","))
+                .map(
+                    s -> String.format("{\"id\":%s}", s))
+                .collect(Collectors.toList())) + "]";
         log.info("Searching log for string '{}'", searchedString);
         checkThatLogsContain(integrationName, searchedString);
     }

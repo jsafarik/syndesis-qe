@@ -17,12 +17,14 @@ Feature: Integration - DB to DB
     And check that position of connection to fill is "Start"
 
     When select the "PostgresDB" connection
-    And select "Periodic stored procedure invocation" integration action
-    And click on the "Done" button
+    And select "Periodic SQL invocation" integration action
+    Then fill in periodic query input with "SELECT * FROM todo" value
+    When click on the "Next" button
 
     When select the "PostgresDB" connection
-    And select "Invoke stored procedure" integration action
-    And click on the "Done" button
+    And select "Invoke SQL" integration action
+    Then fill in periodic query input with "SELECT * FROM todo" value
+    And click on the "Next" button
 
     And publish integration
 
@@ -41,12 +43,14 @@ Feature: Integration - DB to DB
     And check that position of connection to fill is "Start"
 
     When select the "PostgresDB" connection
-    And select "Periodic stored procedure invocation" integration action
-    And click on the "Done" button
+    And select "Periodic SQL invocation" integration action
+    Then fill in periodic query input with "SELECT * FROM todo" value
+    When click on the "Next" button
 
     When select the "PostgresDB" connection
-    And select "Invoke stored procedure" integration action
-    And click on the "Done" button
+    And select "Invoke SQL" integration action
+    Then fill in periodic query input with "SELECT * FROM todo" value
+    When click on the "Next" button
 
     And publish integration
 
@@ -67,12 +71,14 @@ Feature: Integration - DB to DB
     And check that position of connection to fill is "Start"
 
     When select the "PostgresDB" connection
-    And select "Periodic stored procedure invocation" integration action
-    And click on the "Done" button
+    And select "Periodic SQL invocation" integration action
+    Then fill in periodic query input with "SELECT * FROM todo" value
+    And click on the "Next" button
 
     When select the "PostgresDB" connection
-    And select "Invoke stored procedure" integration action
-    And click on the "Done" button
+    And select "Invoke SQL" integration action
+    Then fill in periodic query input with "SELECT * FROM todo" value
+    And click on the "Next" button
 
     And click on the "Publish" button
 
