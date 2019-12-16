@@ -294,3 +294,4 @@ Feature: OData Connector
     And created connections
       | OData | odataHttps | ODataHttps | sample OData service |
     Then check visibility of the "ODataHttps" connection
+
