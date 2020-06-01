@@ -161,14 +161,14 @@ public class TestConfiguration {
             if (get().readValue(SYNDESIS_UI_URL) != null && get().readValue(SYNDESIS_UI_URL).contains("syndesis.my-minishift.syndesis.io")) {
                 //for jenkins
                 get().overrideProperty(OPENSHIFT_ROUTE_SUFFIX, "my-minishift.syndesis.io");
-            } else if (openShiftUrl().endsWith("8443")) {
+            } else if (openShiftUrl().endsWith("443")) {
                 //OCP 3.11
-                if (openShiftUrl().matches("https:\\/\\/(\\d{1,4}\\.){3}\\d{1,4}:8443")) {
+                if (openShiftUrl().matches("https:\\/\\/(\\d{1,4}\\.){3}\\d{1,4}:443")) {
                     //minishift
-                    get().overrideProperty(OPENSHIFT_ROUTE_SUFFIX, StringUtils.substringBetween(openShiftUrl(), "https://", ":8443") + ".nip.io");
+                    get().overrideProperty(OPENSHIFT_ROUTE_SUFFIX, StringUtils.substringBetween(openShiftUrl(), "https://", ":443") + ".nip.io");
                 } else {
                     //remote instance
-                    get().overrideProperty(OPENSHIFT_ROUTE_SUFFIX, prefix + StringUtils.substringBetween(openShiftUrl(), "https://master.", ":8443"));
+                    get().overrideProperty(OPENSHIFT_ROUTE_SUFFIX, prefix + StringUtils.substringBetween(openShiftUrl(), "https://master.", ":443"));
                 }
             } else {
                 //OCP 4.x

@@ -217,6 +217,12 @@ public class CommonSteps {
             $(By.partialLinkText(linkText)).click();
             MinishiftLogin minishiftLogin = new MinishiftLogin();
             minishiftLogin.login(TestConfiguration.syndesisUsername(), TestConfiguration.syndesisPassword());
+        } else if (StringUtils.containsAny(currentUrl, "rdu2")
+            && currentUrl.contains("oauth/authorize")) {
+            String linkText = "Kerberos account";
+            $(By.partialLinkText(linkText)).click();
+            MinishiftLogin minishiftLogin = new MinishiftLogin();
+            minishiftLogin.login(TestConfiguration.syndesisUsername(), TestConfiguration.syndesisPassword());
         }
 
         currentUrl = WebDriverRunner.getWebDriver().getCurrentUrl();

@@ -10,12 +10,12 @@ import com.codeborne.selenide.Condition;
 
 public class MinishiftLogin implements Login {
     private static final class Button {
-        public static final By SIGNIN = By.xpath(".//button[@type='submit']");
+        public static final By SIGNIN = By.xpath(".//input[@id='kc-login']");
     }
 
     private static final class Input {
-        public static final By USERNAME = By.id("inputUsername");
-        public static final By PASSWORD = By.id("inputPassword");
+        public static final By USERNAME = By.id("username");
+        public static final By PASSWORD = By.id("password");
     }
 
     @ExcludeFromSelectorReports
